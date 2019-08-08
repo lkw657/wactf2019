@@ -1,6 +1,6 @@
 # Files
 * `common/crypto.nim` Shitty partial high level wrapper around gcrypt + padding
-* `common/challenge.nim' logging/exception handling + threading/serving
+* `common/challenge.nim` logging/exception handling + threading/serving
 * `padding.nim` padding oracle challenge
 
 A string for the padding oracle attack is
