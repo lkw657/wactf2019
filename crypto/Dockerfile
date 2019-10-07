@@ -1,6 +1,6 @@
 FROM alpine
 
-RUN apk add libc6-compat && apk add libgcrypt
+RUN apk add libc6-compat libgcrypt zlib
 #RUN adduser -S -h /challenge challenge
 
 #USER challenge

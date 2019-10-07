@@ -1,7 +1,7 @@
 FROM alpine
 
 #based on https://github.com/moigagoo/nimage/
-RUN apk add --no-cache g++ curl tar xz libgcrypt git
+RUN apk add --no-cache g++ curl tar xz libgcrypt git zlib zlib-dev
 RUN mkdir -p /nim; \
     curl -sL "https://nim-lang.org/download/nim-1.0.0-linux_x64.tar.xz" \
     |tar -xJ --strip-components=1 -C /nim; \

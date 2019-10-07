@@ -58,12 +58,11 @@ proc AES_CBC_Enc*(k, p: string): string =
   return CipherCBCEnc(k, p, 16, GCRY_CIPHER_AES256)
 
 proc CipherCBCDec*(k, c: string, bs: int, cipherAlgo: gcry_cipher_algos): string =
-  var c = parseHexStr(c)
   var
     cipher: gcry_cipher_hd_t = nil
     iv = c[c.len-bs..<c.len]
     p = newString(c.len - bs) # minus iv
-  c = c[0..<c.len-bs]
+  var c = c[0..<c.len-bs]
   # bindings don't handle the enum types properly :(
   check_rc(gcry_cipher_open(addr cipher, (cint) cipherAlgo, (cint) GCRY_CIPHER_MODE_CBC, 0))
   defer: gcry_cipher_close(cipher)
