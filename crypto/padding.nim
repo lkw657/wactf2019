@@ -17,11 +17,9 @@ proc paddingChallenge(s: SocketHandle) =
       let auth = uncompress(parseHexStr(sock.recvLine().strip))
       # at least 2 blocks + blocksize header and multiple of block size (minus header)
       if auth.len < 2*bs+2 or ((auth.len - 2) mod bs != 0):
-        echo "bad length"
         sock.send("Invalid auth\n")
         return
       if auth[0..<2] != "\x00\x10":
-        echo "bad prefix"
         sock.send("Invalid auth\n")
         return
       # cut off block size prefix
@@ -36,11 +34,9 @@ proc paddingChallenge(s: SocketHandle) =
     except ZlibStreamError:
       # player did not send a valid gzip
       sock.send("Invalid auth\n")
-      echo "zlib error"
     except ValueError as e:
       # not a valid hex string
       sock.send("Invalid auth\n")
-      echo "bad hex"
     except PaddingError as e:
       sock.send(e.msg&"\n")
 
