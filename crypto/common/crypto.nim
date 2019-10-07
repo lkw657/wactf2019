@@ -21,28 +21,28 @@ proc init*() =
   check_rc(gcry_control(GCRYCTL_DISABLE_SECMEM, 0))
   check_rc(gcry_control(GCRYCTL_INITIALIZATION_FINISHED, 0))
 
-proc pkcs7Pad*(p: string): string =
-  var pad = 16 - (p.len mod 16)
+proc pkcs7Pad*(p: string, padSiz: int): string =
+  var pad = padSiz - (p.len mod padSiz)
   return p & repeat((char) pad, pad)
 
-proc pkcs7Unpad*(p: string): string =
-  var pad = (int) p[p.high]
-  if pad <= 0 or pad > 16:
+proc pkcs7Unpad*(p: string, padSiz: int): string =
+  let pad = (int) p[p.high]
+  if pad <= 0 or pad > padSiz:
     raise newException(PaddingError, "Invalid PKCS#7 padding")
   for padTest in p[p.len-pad..p.high]:
     if padTest != (char) pad:
       raise newException(PaddingError, "Invalid PKCS#7 padding")
   return p[0..p.high-pad]
 
-proc AES_CBC_Enc*(k, p: string): string =
+proc CipherCBCEnc*(k, p: string, bs: int, cipherAlgo: gcry_cipher_algos): string =
+  let p = pkcs7Pad(p, bs)
   var
-    p = pkcs7Pad(p)
     cipher: gcry_cipher_hd_t = nil
-    iv = newString(16)
+    iv = newString(bs)
     c = newString(p.len) # length should be the same since p is padded
-  gcry_randomize((cstring) iv, 16, GCRY_STRONG_RANDOM)
+  gcry_randomize((cstring) iv, bs, GCRY_STRONG_RANDOM)
   # bindings don't handle the enum types properly :(
-  check_rc(gcry_cipher_open(addr cipher, (cint) GCRY_CIPHER_AES256, (cint) GCRY_CIPHER_MODE_CBC, 0))
+  check_rc(gcry_cipher_open(addr cipher, (cint) cipherAlgo, (cint) GCRY_CIPHER_MODE_CBC, 0))
   defer: gcry_cipher_close(cipher)
   check_rc(gcry_cipher_setkey(cipher, (cstring) k, k.len))
   check_rc(gcry_cipher_setiv(cipher, (cstring) iv, iv.len))
@@ -50,18 +50,31 @@ proc AES_CBC_Enc*(k, p: string): string =
   check_rc(gcry_cipher_encrypt(cipher, (cstring) c, c.len, (cstring) p, p.len))
   return toHex(c&iv)
 
-proc AES_CBC_Dec*(k, c: string): string =
+
+proc DES_CBC_Enc*(k, p: string): string =
+  return CipherCBCEnc(k, p, 8, GCRY_CIPHER_DES)
+
+proc AES_CBC_Enc*(k, p: string): string =
+  return CipherCBCEnc(k, p, 16, GCRY_CIPHER_AES256)
+
+proc CipherCBCDec*(k, c: string, bs: int, cipherAlgo: gcry_cipher_algos): string =
   var c = parseHexStr(c)
   var
     cipher: gcry_cipher_hd_t = nil
-    iv = c[c.len-16..<c.len]
-    p = newString(c.len - 16) # minus iv
-  c = c[0..<c.len-16]
+    iv = c[c.len-bs..<c.len]
+    p = newString(c.len - bs) # minus iv
+  c = c[0..<c.len-bs]
   # bindings don't handle the enum types properly :(
-  check_rc(gcry_cipher_open(addr cipher, (cint) GCRY_CIPHER_AES256, (cint) GCRY_CIPHER_MODE_CBC, 0))
+  check_rc(gcry_cipher_open(addr cipher, (cint) cipherAlgo, (cint) GCRY_CIPHER_MODE_CBC, 0))
   defer: gcry_cipher_close(cipher)
   check_rc(gcry_cipher_setkey(cipher, (cstring) k, k.len))
   check_rc(gcry_cipher_setiv(cipher, (cstring) iv, iv.len))
   check_rc(gcry_cipher_final(cipher))
   check_rc(gcry_cipher_decrypt(cipher, (cstring) p, p.len, (cstring) c, c.len))
-  return pkcs7unpad(p)
+  return pkcs7unpad(p, bs)
+
+proc AES_CBC_Dec*(k, c: string): string =
+  CipherCBCDec(k, c, 16, GCRY_CIPHER_AES256)
+
+proc DES_CBC_Dec*(k, c: string): string =
+  CipherCBCDec(k, c, 8, GCRY_CIPHER_DES)
