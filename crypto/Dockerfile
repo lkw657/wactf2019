@@ -1,9 +1,9 @@
 FROM alpine
 
 RUN apk add libc6-compat libgcrypt zlib
-#RUN adduser -S -h /challenge challenge
+RUN adduser -S -h /challenge challenge
 
-#USER challenge
+USER challenge
 
 WORKDIR /challenge
 COPY ./padding-alpine /challenge
