@@ -15,8 +15,8 @@ template check_rc(rc: gcry_error_t): untyped =
       raise newException(CryptoError, $gcry_strerror(rc))
 
 proc init*() =
-  if gcry_check_version(GCRYPT_VERSION) != GCRYPT_VERSION:
-    raise newException(CryptoError, "Gcrypt version mismatch")
+  #if gcry_check_version(GCRYPT_VERSION) != GCRYPT_VERSION:
+  #  raise newException(CryptoError, "Gcrypt version mismatch")
   # Don't bother with secure memory
   check_rc(gcry_control(GCRYCTL_DISABLE_SECMEM, 0))
   check_rc(gcry_control(GCRYCTL_INITIALIZATION_FINISHED, 0))
@@ -40,14 +40,14 @@ proc CipherCBCEnc*(k, p: string, bs: int, cipherAlgo: gcry_cipher_algos): string
     cipher: gcry_cipher_hd_t = nil
     iv = newString(bs)
     c = newString(p.len) # length should be the same since p is padded
-  gcry_randomize((cstring) iv, bs, GCRY_STRONG_RANDOM)
+  gcry_randomize((cstring) iv, (uint) bs, GCRY_STRONG_RANDOM)
   # bindings don't handle the enum types properly :(
   check_rc(gcry_cipher_open(addr cipher, (cint) cipherAlgo, (cint) GCRY_CIPHER_MODE_CBC, 0))
   defer: gcry_cipher_close(cipher)
-  check_rc(gcry_cipher_setkey(cipher, (cstring) k, k.len))
-  check_rc(gcry_cipher_setiv(cipher, (cstring) iv, iv.len))
+  check_rc(gcry_cipher_setkey(cipher, (cstring) k, (uint) k.len))
+  check_rc(gcry_cipher_setiv(cipher, (cstring) iv, (uint) iv.len))
   check_rc(gcry_cipher_final(cipher))
-  check_rc(gcry_cipher_encrypt(cipher, (cstring) c, c.len, (cstring) p, p.len))
+  check_rc(gcry_cipher_encrypt(cipher, (cstring) c, (uint) c.len, (cstring) p, (uint) p.len))
   return toHex(c&iv)
 
 
@@ -66,10 +66,10 @@ proc CipherCBCDec*(k, c: string, bs: int, cipherAlgo: gcry_cipher_algos): string
   # bindings don't handle the enum types properly :(
   check_rc(gcry_cipher_open(addr cipher, (cint) cipherAlgo, (cint) GCRY_CIPHER_MODE_CBC, 0))
   defer: gcry_cipher_close(cipher)
-  check_rc(gcry_cipher_setkey(cipher, (cstring) k, k.len))
-  check_rc(gcry_cipher_setiv(cipher, (cstring) iv, iv.len))
+  check_rc(gcry_cipher_setkey(cipher, (cstring) k, (uint) k.len))
+  check_rc(gcry_cipher_setiv(cipher, (cstring) iv, (uint) iv.len))
   check_rc(gcry_cipher_final(cipher))
-  check_rc(gcry_cipher_decrypt(cipher, (cstring) p, p.len, (cstring) c, c.len))
+  check_rc(gcry_cipher_decrypt(cipher, (cstring) p, (uint) p.len, (cstring) c, (uint) c.len))
   return pkcs7unpad(p, bs)
 
 proc AES_CBC_Dec*(k, c: string): string =
