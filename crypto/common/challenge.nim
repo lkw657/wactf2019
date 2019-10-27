@@ -18,14 +18,13 @@ proc makeErrorMsg(e: ref Exception): string =
 
 template plsNoDie*(stmts: untyped) =
   let logger = newConsoleLogger(fmtStr="\x1b[1;31m$levelname [$datetime] -- $appname: \x1b[0m", useStderr=true)
-  addHandler(logger)
+  #addHandler(logger)
   try:
     stmts
   except Exception as e:
-    error(makeErrorMsg(e))
+    #error(makeErrorMsg(e))
+    logger.log(lvlError, makeErrorMsg(e))
 
-# compiler doesn't realise the fp is GC safe and refuses to compile
-# use template as workaround
 template runChallenge*(port: int, run: proc(s:SocketHandle){.nimcall.}) =
   crypto.init()
   let socket = newSocket()
