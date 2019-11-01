@@ -33,7 +33,7 @@ proc paddingChallenge(s: SocketHandle) =
         sock.send("Wrong password\n")
     except ZlibStreamError:
       # player did not send a valid gzip
-      sock.send("Invalid auth\n")
+      sock.send("Gzip error\n")
     except ValueError:
       # not a valid hex string
       sock.send("Invalid auth\n")

@@ -48,7 +48,7 @@ proc CipherCBCEnc*(k, p: string, bs: int, cipherAlgo: gcry_cipher_algos): string
   check_rc(gcry_cipher_setiv(cipher, (cstring) iv, (uint) iv.len))
   check_rc(gcry_cipher_final(cipher))
   check_rc(gcry_cipher_encrypt(cipher, (cstring) c, (uint) c.len, (cstring) p, (uint) p.len))
-  return toHex(c&iv)
+  return toHex(iv&c)
 
 
 proc DES_CBC_Enc*(k, p: string): string =
@@ -60,9 +60,9 @@ proc AES_CBC_Enc*(k, p: string): string =
 proc CipherCBCDec*(k, c: string, bs: int, cipherAlgo: gcry_cipher_algos): string =
   var
     cipher: gcry_cipher_hd_t = nil
-    iv = c[c.len-bs..<c.len]
+    iv = c[0..<bs]
     p = newString(c.len - bs) # minus iv
-  var c = c[0..<c.len-bs]
+  var c = c[bs..<c.len]
   # bindings don't handle the enum types properly :(
   check_rc(gcry_cipher_open(addr cipher, (cint) cipherAlgo, (cint) GCRY_CIPHER_MODE_CBC, 0))
   defer: gcry_cipher_close(cipher)

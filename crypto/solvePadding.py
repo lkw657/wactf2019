@@ -6,16 +6,17 @@ import socket
 import gzip
 
 CHUNK_SIZE = 128
-
 BS=16
 
-combined = gzip.decompress(unhexlify('1f8b0800b71f9b5d00ff6310e0569d58b1354b3d3d63a3d99d1b7dab1c5a739f084a6b484b2d5d31bfa7547d43ace85469cb80ab77235f9c2cd1ffbefa40a0d7891d05af5fdd5c5979f4b25d75f7e7f3001a9ee0c142000000'))
-c = combined[:len(combined)-BS][2:]
-iv = combined[len(combined)-BS:]
-print('c:', hexlify(c))
-print('iv:', hexlify(iv))
-c=list(c)
-iv=list(iv)
+combined = gzip.decompress(unhexlify('1f8b08003f25bc5d00ff6310e82a70b54f5c2a7223e581e65fd99513e24bc3ce5eabadd5cedfb64b9a79b6c1db98ce9f95e18cf9260d917969ab73a6bacce759fda2e3aa8f8163e581fa2bdf0d1d660100e3496d6a42000000'))
+combined = combined[2:] # cut off the block size prefix
+#iv = combined[:BS]
+#c = combined[BS:]
+#print('c:', hexlify(c))
+#print('iv:', hexlify(iv))
+#c=list(c)
+#iv=list(iv)
+combined = list(combined)
 
 def oracle(c):
     '''
@@ -54,9 +55,7 @@ def bruteByte(block1, block2, current):
             # make sure we are not just returning the initial valid padding
             continue
         block1[-current] = i
-        # first block needs to go at end to be iv
-        #print("block2", block2, "\n", 'block1', block1)
-        if oracle(bytes(block2+block1)):
+        if oracle(bytes(block1+block2)):
             return i^current^initial
     #if can't find another padding byte for the first then there was only 1 byte of padding
     if current == 1: return 1;
@@ -82,16 +81,17 @@ def solveBlock(block1, block2):
 def solve():
     # ciphertext blocks
     blocks = []
-    for i in range(0, len(c), BS):
-        blocks.append(c[i:i+BS])
+    for i in range(0, len(combined), BS):
+        blocks.append(combined[i:i+BS])
     # plaintext
     p = []
     # solve every block
     for i in range(1, len(blocks)):
-        p = solveBlock(blocks[-i-1], blocks[-i]) + p
+        #p = solveBlock(blocks[-i-1], blocks[-i]) + p
+        p += solveBlock(blocks[i-1], blocks[i])
         print('solved block', bytes(p))
         print()
-    p = solveBlock(iv, blocks[0]) + p
+    #p = solveBlock(iv, blocks[0]) + p
     # print result
     print(bytes(p))
 
