@@ -18,8 +18,8 @@ Challenge Data:
 
 |Admin Facing | <> |
 |--- | --- |
-|Challenge Flag| WACTF{omen-leotard-unjustly-gloomily} |
-|Challenge Vuln| Padding oracle |
+|Challenge Flag| WACTF{aeaephck-ngchaeip-aechthoo-iephphqu-ohsengqu-ghshphee-ghshckoh-eeseohae-sesephgh-eethchow-ngooipohngcheeck} |
+|Challenge Vuln| ? |
 
 Challenge PoC
 ---
