@@ -38,7 +38,7 @@ Public Class Service1
         Do While Not Me.stopping
             ' Perform main service function here...
 
-            Thread.Sleep(300000 * 3)  ' Simulate some lengthy operations.
+            Thread.Sleep(300000)  ' Simulate some lengthy operations.
             Me.performAccountTask()
 
         Loop
