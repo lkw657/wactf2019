@@ -1,8 +1,9 @@
 ## Solution
 * Change system time to X
-* Open in dnspy
+* add service (sc.exe create gross binPath=C:\gross.net.exe)
+* run service (sc.exe start gross)
+* attach with dnspy
 * Set breakpoint at the end of generatePassword
-* Run binary
 * Read password
 * Submit as WACTF3{password}
 
