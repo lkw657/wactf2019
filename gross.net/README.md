@@ -1,4 +1,5 @@
 ## Solution
+* If using vbox it needs to be told not to reset the time `VBoxManage setextradata "vmname" "VBoxInternal/Devices/VMMDev/0/Config/GetHostTimeDisabled" 1`
 * Change system time to 11:00 AM on the 30th of November 2019
 * add service (sc.exe create gross binPath=C:\gross.net.exe)
 * run service (sc.exe start gross)
