@@ -18,7 +18,7 @@ Challenge Data:
 
 |Admin Facing | <> |
 |--- | --- |
-|Challenge Flag| WACTF{aeaephck-ngchaeip-aechthoo-iephphqu-ohsengqu-ghshphee-ghshckoh-eeseohae-sesephgh-eethchow-ngooipohngcheeck} |
+|Challenge Flag| WACTF3{aeaephck-ngchaeip-aechthoo-iephphqu-ohsengqu-ghshphee-ghshckoh-eeseohae-sesephgh-eethchow-ngooipohngcheeck} |
 |Challenge Vuln| ? |
 
 Challenge PoC
